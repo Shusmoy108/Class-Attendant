@@ -42,7 +42,7 @@ class PreviousStudentPageState extends State<PreviousStudentPage> {
           color: Colors.grey,
           child: CheckboxListTile(
             title: Text(
-              "Student ID/Roll : " + students[index].studentId,
+              "Student ID/Roll : " + students[index].studentId.toString(),
               style: TextStyle(
                   fontFamily: "ProximaNova",
                   fontSize: 20,
@@ -125,38 +125,39 @@ class PreviousStudentPageState extends State<PreviousStudentPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.lightGreen,
-          title: Text(
-            'Previous Students',
-            style: TextStyle(
-                fontFamily: "ProximaNova",
-                fontSize: 24,
-                fontWeight: FontWeight.w600),
-          ),
-          //actions: <Widget>[floating()],
-        ),
-
-        //backgroundColor: Colors.transparent,
-        body: _buildCheckboxGroups(context),
-        floatingActionButton: Wrap(
-          spacing: 10,
-          children: <Widget>[
-            floating(),
-            FloatingActionButton.extended(
-              heroTag: "addStudent",
-              onPressed: () {
-                addStudent();
-                Navigator.of(context).pop();
-              },
-              label: Text(
-                'Save',
+    return SafeArea(
+        child: Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.lightGreen,
+              title: Text(
+                'Previous Students',
+                style: TextStyle(
+                    fontFamily: "ProximaNova",
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600),
               ),
-              icon: Icon(Icons.save),
-              backgroundColor: Color.fromRGBO(80, 200, 10, 0.7),
-            )
-          ],
-        ));
+              //actions: <Widget>[floating()],
+            ),
+
+            //backgroundColor: Colors.transparent,
+            body: _buildCheckboxGroups(context),
+            floatingActionButton: Wrap(
+              spacing: 10,
+              children: <Widget>[
+                floating(),
+                FloatingActionButton.extended(
+                  heroTag: "addStudent",
+                  onPressed: () {
+                    addStudent();
+                    Navigator.of(context).pop();
+                  },
+                  label: Text(
+                    'Save',
+                  ),
+                  icon: Icon(Icons.save),
+                  backgroundColor: Color.fromRGBO(80, 200, 10, 0.7),
+                )
+              ],
+            )));
   }
 }

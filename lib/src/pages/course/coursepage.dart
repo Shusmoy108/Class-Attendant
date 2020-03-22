@@ -30,6 +30,7 @@ class CoursePageState extends State<CoursePage> {
 
   TextEditingController controller = new TextEditingController();
   void _showDialog(context) {
+    final _formKey = GlobalKey<FormState>();
     showGeneralDialog(
         barrierColor: Colors.black.withOpacity(0.5),
         transitionBuilder: (context, a1, a2, widget) {
@@ -42,20 +43,35 @@ class CoursePageState extends State<CoursePage> {
                 shape: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16.0)),
                 title: Text('Add Course'),
-                content: TextField(controller: controller),
+                content: Form(
+                    key: _formKey,
+                    child: TextFormField(
+                      controller: controller,
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter a course name';
+                        }
+                        return null;
+                      },
+                    )),
                 actions: <Widget>[
                   // usually buttons at the bottom of the dialog
                   new FlatButton(
                     child: new Text("Submit"),
                     onPressed: () async {
-                      DatabaseClass dc = new DatabaseClass();
-                      await dc.saveCourse(controller.text);
-                      controller.clear();
-                      Navigator.of(context).pop();
-                      var router = new MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              new CoursePage(""));
-                      Navigator.of(context).pushReplacement(router);
+                      if (_formKey.currentState.validate()) {
+                        DatabaseClass dc = new DatabaseClass();
+                        String cname =
+                            '${controller.text[0].toUpperCase()}${controller.text.substring(1)}';
+                        await dc.saveCourse(cname);
+                        controller.clear();
+                        Navigator.of(context).pop();
+
+                        var router = new MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                new CoursePage(""));
+                        Navigator.of(context).pushReplacement(router);
+                      }
                     },
                   ),
                 ],
@@ -72,7 +88,8 @@ class CoursePageState extends State<CoursePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.lightGreen,
@@ -113,6 +130,6 @@ class CoursePageState extends State<CoursePage> {
         icon: Icon(Icons.add),
         backgroundColor: Color.fromRGBO(80, 200, 10, 0.7),
       ),
-    );
+    ));
   }
 }

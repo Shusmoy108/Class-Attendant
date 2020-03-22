@@ -5,6 +5,7 @@ import 'package:attendencemeter/src/pages/course/importfromcourse.dart';
 import 'package:attendencemeter/src/pages/student/previousstudentcart.dart';
 import 'package:attendencemeter/src/pages/student/studentpage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:unicorndial/unicorndial.dart';
 
 class CustomFAButton extends StatelessWidget {
@@ -15,6 +16,7 @@ class CustomFAButton extends StatelessWidget {
   TextEditingController idcontroller = new TextEditingController();
   List<int> selectedId = List();
   void _showDialog(context) {
+    final _formKey = GlobalKey<FormState>();
     showGeneralDialog(
         barrierColor: Colors.black.withOpacity(0.5),
         transitionBuilder: (context, a1, a2, widget) {
@@ -27,22 +29,37 @@ class CustomFAButton extends StatelessWidget {
                 shape: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16.0)),
                 title: Text('Add Student'),
-                content: SizedBox(
-                  height: 150,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                content: Form(
+                  key: _formKey,
+                  child: Wrap(
+                    direction: Axis.horizontal,
                     children: <Widget>[
-                      TextField(
+                      TextFormField(
                         controller: idcontroller,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter.digitsOnly
+                        ],
                         decoration:
                             new InputDecoration(labelText: 'Student ID'),
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter a student id';
+                          }
+                          return null;
+                        },
                       ),
-                      TextField(
+                      TextFormField(
                         controller: namecontroller,
                         decoration: new InputDecoration(
                             labelText: 'Student Name',
                             hintText: 'eg. John Smith'),
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter a student name';
+                          }
+                          return null;
+                        },
                       ),
                     ],
                   ),
@@ -52,23 +69,25 @@ class CustomFAButton extends StatelessWidget {
                   new FlatButton(
                     child: new Text("Submit"),
                     onPressed: () async {
-                      DatabaseClass dc = new DatabaseClass();
-                      Student student =
-                          new Student(idcontroller.text, namecontroller.text);
-                      if (courseId != -1) {
-                        student.addcourse(c.id);
-                        await dc.saveStudent(student);
-                        dc.updateCourseafterStudentAdd(c, student);
-                      } else {
-                        dc.saveStudent(student);
+                      if (_formKey.currentState.validate()) {
+                        DatabaseClass dc = new DatabaseClass();
+                        Student student = new Student(
+                            int.parse(idcontroller.text), namecontroller.text);
+                        if (courseId != -1) {
+                          student.addcourse(c.id);
+                          await dc.saveStudent(student);
+                          dc.updateCourseafterStudentAdd(c, student);
+                        } else {
+                          dc.saveStudent(student);
+                        }
+                        namecontroller.clear();
+                        idcontroller.clear();
+                        Navigator.of(context).pop();
+                        var router = new MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                new StudentPage.course(c, courseId));
+                        Navigator.of(context).pushReplacement(router);
                       }
-                      namecontroller.clear();
-                      idcontroller.clear();
-                      Navigator.of(context).pop();
-                      var router = new MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              new StudentPage.course(c, courseId));
-                      Navigator.of(context).pushReplacement(router);
                     },
                   ),
                 ],
@@ -108,7 +127,7 @@ class CustomFAButton extends StatelessWidget {
   Widget student(Student student, context) {
     return ListTile(
       title: Text(student.name),
-      leading: Text(student.studentId),
+      leading: Text(student.studentId.toString()),
       trailing: Checkbox(
           value: selectedId.contains(student.id),
           onChanged: (bool newValue) {

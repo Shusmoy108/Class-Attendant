@@ -30,8 +30,9 @@ dependencies:
   datetime_picker_formfield: ^1.0.0
   intl: ^0.16.1
   charts_flutter: ^0.9.0
-  csv: ^4.0.3
-  open_file: ^3.0.1
+  pdf: ^1.5.0
+  flutter_full_pdf_viewer: ^1.0.6
+  path: ^1.6.4
   # simple_permissions: ^0.1.9
 
 dev_dependencies:
@@ -49,8 +50,25 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #  - images/a_dot_burr.jpeg
+  assets:
+    - images/addcrcstdnt1.png
+    - images/studentedit.png
+    - images/prvsstdnt.png
+    - images/importcrc.png
+    - images/course.png
+    - images/courseadd.png
+    - images/student.png
+    - images/stdntprf.png
+    - images/studentedit.png
+    - images/stat.png
+    - images/statstud.png
+    - images/statgraph.png
+    - images/attndnc.png
+    - images/attndnce.png
+    - images/attndncprrt.png
+    - images/attndncpart1.png
+    - images/attndncsheet.png
+
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

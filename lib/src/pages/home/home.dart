@@ -4,6 +4,7 @@ import 'package:attendencemeter/src/models/profile.dart';
 import 'package:attendencemeter/src/models/student.dart';
 import 'package:attendencemeter/src/pages/attendence/attendencepage.dart';
 import 'package:attendencemeter/src/pages/course/coursepage.dart';
+import 'package:attendencemeter/src/pages/help/help.dart';
 import 'package:attendencemeter/src/pages/statistics/statisticspage.dart';
 import 'package:attendencemeter/src/pages/student/studentpage.dart';
 import 'package:flutter/material.dart';
@@ -171,294 +172,305 @@ class HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return new FutureBuilder(
-        future: course(),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData == false) {
-            return Container(
-                color: Colors.white, child: CircularProgressIndicator());
-          } else {
-            return Scaffold(
-                appBar: AppBar(
-                    centerTitle: true,
-                    backgroundColor: Colors.lightGreen,
-                    title: Text("Class Attendant")),
-                drawer: Drawer(
-                  child: Column(
-                    children: <Widget>[
-                      Expanded(
+    return new SafeArea(
+        child: FutureBuilder(
+            future: course(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.hasData == false) {
+                return Container(
+                    color: Colors.white, child: CircularProgressIndicator());
+              } else {
+                return Scaffold(
+                    appBar: AppBar(
+                        centerTitle: true,
+                        backgroundColor: Colors.lightGreen,
+                        title: Text("Class Attendant")),
+                    drawer: Drawer(
+                      child: Column(
+                        children: <Widget>[
+                          Expanded(
+                            child: ListView(
+                              children: <Widget>[
+                                DrawerHeader(
+                                  child: ListTile(
+                                    leading: Icon(
+                                      Icons.account_circle,
+                                      size: 80,
+                                    ),
+                                    title: Text(pro.name,
+                                        style: TextStyle(
+                                            fontFamily: "ProximaNova",
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w600)),
+                                    subtitle: Text(pro.institution,
+                                        style: TextStyle(
+                                            fontFamily: "ProximaNova",
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w500)),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blueGrey,
+                                  ),
+                                ),
+                                ListTile(
+                                  leading: Icon(Icons.library_books),
+                                  title: Text(
+                                    'Courses',
+                                    style: TextStyle(
+                                        fontFamily: "ProximaNova",
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  onTap: () {
+                                    var router = new MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            new CoursePage(""));
+                                    Navigator.of(context).push(router);
+                                  },
+                                ),
+                                ListTile(
+                                  leading: Icon(Icons.assignment_turned_in),
+                                  title: Text(
+                                    'Attendence',
+                                    style: TextStyle(
+                                        fontFamily: "ProximaNova",
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  onTap: () async {
+                                    final crc = await dc.getcourses();
+                                    List<Course> courses = crc;
+                                    var router = new MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            new AttendencePage(courses));
+                                    Navigator.of(context).push(router);
+                                  },
+                                ),
+                                ListTile(
+                                  leading: Icon(Icons.group),
+                                  title: Text(
+                                    'Students',
+                                    style: TextStyle(
+                                        fontFamily: "ProximaNova",
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  onTap: () {
+                                    var router = new MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            new StudentPage(-1));
+                                    Navigator.of(context).push(router);
+                                  },
+                                ),
+                                ListTile(
+                                  leading: Icon(Icons.insert_chart),
+                                  title: Text(
+                                    'Statistics',
+                                    style: TextStyle(
+                                        fontFamily: "ProximaNova",
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  onTap: () {
+                                    var router = new MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            new StatisticPage(pro));
+                                    Navigator.of(context).push(router);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                              // This align moves the children to the bottom
+                              child: Align(
+                                  alignment: FractionalOffset.bottomCenter,
+                                  // This container holds all the children that will be aligned
+                                  // on the bottom and should not scroll with the above ListView
+                                  child: Container(
+                                      child: Column(
+                                    children: <Widget>[
+                                      Divider(),
+                                      ListTile(
+                                        leading: Icon(Icons.help),
+                                        title: Text('Help and Feedback',
+                                            style: TextStyle(
+                                                fontFamily: "ProximaNova",
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500)),
+                                        onTap: () {
+                                          var router = new MaterialPageRoute(
+                                              builder: (BuildContext context) =>
+                                                  new HelpPage(""));
+                                          Navigator.of(context).push(router);
+                                        },
+                                      ),
+                                      ListTile(
+                                          leading: Icon(Icons.work),
+                                          title: Text('About Us',
+                                              style: TextStyle(
+                                                  fontFamily: "ProximaNova",
+                                                  fontSize: 18,
+                                                  fontWeight:
+                                                      FontWeight.w500))),
+                                    ],
+                                  ))))
+                        ],
+                      ),
+                    ),
+                    body: Container(
+                        color: Color.fromRGBO(234, 239, 241, 1.0),
                         child: ListView(
                           children: <Widget>[
-                            DrawerHeader(
-                              child: ListTile(
-                                leading: Icon(
-                                  Icons.account_circle,
-                                  size: 80,
-                                ),
-                                title: Text(pro.name,
-                                    style: TextStyle(
-                                        fontFamily: "ProximaNova",
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w600)),
-                                subtitle: Text(pro.institution,
-                                    style: TextStyle(
-                                        fontFamily: "ProximaNova",
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w500)),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                              decoration: BoxDecoration(
+                            Icon(
+                              Icons.account_circle,
+                              size: 100,
+                            ),
+                            Divider(
                                 color: Colors.blueGrey,
-                              ),
+                                thickness: 1,
+                                indent: 5),
+                            SizedBox(height: 2),
+                            Center(
+                              child: Text(pro.name,
+                                  style: TextStyle(
+                                      fontFamily: "ProximaNova",
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold)),
                             ),
-                            ListTile(
-                              leading: Icon(Icons.library_books),
-                              title: Text(
-                                'Courses',
-                                style: TextStyle(
-                                    fontFamily: "ProximaNova",
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              onTap: () {
-                                var router = new MaterialPageRoute(
-                                    builder: (BuildContext context) =>
-                                        new CoursePage(""));
-                                Navigator.of(context).push(router);
-                              },
+                            Center(
+                              child: Text(pro.institution,
+                                  style: TextStyle(
+                                      fontFamily: "ProximaNova",
+                                      fontSize: 18,
+                                      fontStyle: FontStyle.italic)),
                             ),
-                            ListTile(
-                              leading: Icon(Icons.assignment_turned_in),
-                              title: Text(
-                                'Attendence',
-                                style: TextStyle(
-                                    fontFamily: "ProximaNova",
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              onTap: () async {
-                                final crc = await dc.getcourses();
-                                List<Course> courses = crc;
-                                var router = new MaterialPageRoute(
-                                    builder: (BuildContext context) =>
-                                        new AttendencePage(courses));
-                                Navigator.of(context).push(router);
-                              },
+                            SizedBox(height: 2),
+                            Padding(
+                              padding: EdgeInsets.only(left: 8),
+                              child: Text("Courses",
+                                  style: TextStyle(
+                                      fontFamily: "ProximaNova",
+                                      fontSize: 15,
+                                      fontStyle: FontStyle.italic)),
                             ),
-                            ListTile(
-                              leading: Icon(Icons.group),
-                              title: Text(
-                                'Students',
-                                style: TextStyle(
-                                    fontFamily: "ProximaNova",
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              onTap: () {
-                                var router = new MaterialPageRoute(
-                                    builder: (BuildContext context) =>
-                                        new StudentPage(-1));
-                                Navigator.of(context).push(router);
-                              },
-                            ),
-                            ListTile(
-                              leading: Icon(Icons.insert_chart),
-                              title: Text(
-                                'Statistics',
-                                style: TextStyle(
-                                    fontFamily: "ProximaNova",
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              onTap: () {
-                                var router = new MaterialPageRoute(
-                                    builder: (BuildContext context) =>
-                                        new StatisticPage(""));
-                                Navigator.of(context).push(router);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                          // This align moves the children to the bottom
-                          child: Align(
-                              alignment: FractionalOffset.bottomCenter,
-                              // This container holds all the children that will be aligned
-                              // on the bottom and should not scroll with the above ListView
-                              child: Container(
+                            Divider(),
+                            Card(
+                                margin: EdgeInsets.all(10),
+                                child: Padding(
+                                  padding: EdgeInsets.all(10),
                                   child: Column(
-                                children: <Widget>[
-                                  Divider(),
-                                  ListTile(
-                                      leading: Icon(Icons.help),
-                                      title: Text('Help and Feedback',
-                                          style: TextStyle(
-                                              fontFamily: "ProximaNova",
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500))),
-                                  ListTile(
-                                      leading: Icon(Icons.work),
-                                      title: Text('About Us',
-                                          style: TextStyle(
-                                              fontFamily: "ProximaNova",
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500))),
-                                ],
-                              ))))
-                    ],
-                  ),
-                ),
-                body: Container(
-                    color: Color.fromRGBO(234, 239, 241, 1.0),
-                    child: ListView(
-                      children: <Widget>[
-                        Icon(
-                          Icons.account_circle,
-                          size: 100,
-                        ),
-                        Divider(
-                            color: Colors.blueGrey, thickness: 1, indent: 5),
-                        SizedBox(height: 2),
-                        Center(
-                          child: Text(pro.name,
-                              style: TextStyle(
-                                  fontFamily: "ProximaNova",
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold)),
-                        ),
-                        Center(
-                          child: Text(pro.institution,
-                              style: TextStyle(
-                                  fontFamily: "ProximaNova",
-                                  fontSize: 18,
-                                  fontStyle: FontStyle.italic)),
-                        ),
-                        SizedBox(height: 2),
-                        Padding(
-                          padding: EdgeInsets.only(left: 8),
-                          child: Text("Courses",
-                              style: TextStyle(
-                                  fontFamily: "ProximaNova",
-                                  fontSize: 15,
-                                  fontStyle: FontStyle.italic)),
-                        ),
-                        Divider(),
-                        Card(
-                            margin: EdgeInsets.all(10),
-                            child: Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Column(
-                                children: <Widget>[
-                                  SizedBox(),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      Text("Total Courses",
-                                          style: TextStyle(
-                                              fontFamily: "ProximaNova",
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold)),
-                                      Text(totalcourse,
-                                          style: TextStyle(
-                                              fontFamily: "ProximaNova",
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold)),
+                                      SizedBox(),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Text("Total Courses",
+                                              style: TextStyle(
+                                                  fontFamily: "ProximaNova",
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                          Text(totalcourse,
+                                              style: TextStyle(
+                                                  fontFamily: "ProximaNova",
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                      SizedBox(height: 5),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Text("Course Names",
+                                              style: TextStyle(
+                                                  fontFamily: "ProximaNova",
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                          Text(coursenames,
+                                              style: TextStyle(
+                                                  fontFamily: "ProximaNova",
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                      SizedBox(height: 5),
                                     ],
                                   ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                )),
+                            SizedBox(height: 2),
+                            Padding(
+                              padding: EdgeInsets.only(left: 8),
+                              child: Text("Classes",
+                                  style: TextStyle(
+                                      fontFamily: "ProximaNova",
+                                      fontSize: 15,
+                                      fontStyle: FontStyle.italic)),
+                            ),
+                            Divider(),
+                            Card(
+                                margin: EdgeInsets.all(10),
+                                child: Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(children: attendences),
+                                )),
+                            SizedBox(height: 2),
+                            Padding(
+                              padding: EdgeInsets.only(left: 8),
+                              child: Text("Students",
+                                  style: TextStyle(
+                                      fontFamily: "ProximaNova",
+                                      fontSize: 15,
+                                      fontStyle: FontStyle.italic)),
+                            ),
+                            Divider(),
+                            Card(
+                                margin: EdgeInsets.all(10),
+                                child: Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(
                                     children: <Widget>[
-                                      Text("Course Names",
-                                          style: TextStyle(
-                                              fontFamily: "ProximaNova",
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold)),
-                                      Text(coursenames,
-                                          style: TextStyle(
-                                              fontFamily: "ProximaNova",
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold)),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Text("Total Students",
+                                              style: TextStyle(
+                                                  fontFamily: "ProximaNova",
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                          Text(totalstudents.toString(),
+                                              style: TextStyle(
+                                                  fontFamily: "ProximaNova",
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                      SizedBox(height: 5),
                                     ],
                                   ),
-                                  SizedBox(height: 5),
-                                ],
-                              ),
-                            )),
-                        SizedBox(height: 2),
-                        Padding(
-                          padding: EdgeInsets.only(left: 8),
-                          child: Text("Classes",
-                              style: TextStyle(
-                                  fontFamily: "ProximaNova",
-                                  fontSize: 15,
-                                  fontStyle: FontStyle.italic)),
-                        ),
-                        Divider(),
-                        Card(
-                            margin: EdgeInsets.all(10),
-                            child: Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Column(children: attendences),
-                            )),
-                        SizedBox(height: 2),
-                        Padding(
-                          padding: EdgeInsets.only(left: 8),
-                          child: Text("Students",
-                              style: TextStyle(
-                                  fontFamily: "ProximaNova",
-                                  fontSize: 15,
-                                  fontStyle: FontStyle.italic)),
-                        ),
-                        Divider(),
-                        Card(
-                            margin: EdgeInsets.all(10),
-                            child: Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Column(
-                                children: <Widget>[
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Text("Total Students",
-                                          style: TextStyle(
-                                              fontFamily: "ProximaNova",
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold)),
-                                      Text(totalstudents.toString(),
-                                          style: TextStyle(
-                                              fontFamily: "ProximaNova",
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                  SizedBox(height: 5),
-                                ],
-                              ),
-                            ))
-                      ],
-                    )),
-                floatingActionButton: FloatingActionButton.extended(
-                  heroTag: "addStudent",
-                  onPressed: () {
-                    name = new TextEditingController(text: pro.name);
-                    instititute =
-                        new TextEditingController(text: pro.institution);
-                    _showDialog(context);
-                  },
-                  label: Text(
-                    'Edit Profile',
-                  ),
-                  icon: Icon(Icons.edit),
-                  backgroundColor: Color.fromRGBO(80, 200, 10, 0.7),
-                ));
-          }
-        });
+                                ))
+                          ],
+                        )),
+                    floatingActionButton: FloatingActionButton.extended(
+                      heroTag: "addStudent",
+                      onPressed: () {
+                        name = new TextEditingController(text: pro.name);
+                        instititute =
+                            new TextEditingController(text: pro.institution);
+                        _showDialog(context);
+                      },
+                      label: Text(
+                        'Edit Profile',
+                      ),
+                      icon: Icon(Icons.edit),
+                      backgroundColor: Color.fromRGBO(80, 200, 10, 0.7),
+                    ));
+              }
+            }));
   }
 }

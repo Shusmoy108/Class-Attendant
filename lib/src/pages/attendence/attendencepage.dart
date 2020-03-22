@@ -74,32 +74,46 @@ class AttendencePageState extends State<AttendencePage> {
 
   Widget searchdropdown() {
     //courseName = courses[0].courseName;
-    return DropdownButton<String>(
-      value: searchValue,
-      icon: Icon(Icons.arrow_downward),
-      iconSize: 20,
-      elevation: 16,
-      //style: TextStyle(color: Colors.deepPurple),
-      underline: Container(
-        height: 2,
-        color: Colors.black87,
+    return Container(
+      child: Wrap(
+        children: <Widget>[
+          Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Text("Course Name : ",
+                  style: TextStyle(
+                      color: Colors.black87,
+                      fontFamily: "ProximaNova",
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600))),
+          DropdownButton<String>(
+            value: searchValue,
+            icon: Icon(Icons.arrow_downward),
+            iconSize: 20,
+            elevation: 16,
+            //style: TextStyle(color: Colors.deepPurple),
+            underline: Container(
+              height: 2,
+              color: Colors.black87,
+            ),
+            onChanged: (String newValue) {
+              setState(() {
+                searchValue = newValue;
+              });
+            },
+            items: search.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value,
+                    style: TextStyle(
+                        color: Colors.black87,
+                        fontFamily: "ProximaNova",
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600)),
+              );
+            }).toList(),
+          )
+        ],
       ),
-      onChanged: (String newValue) {
-        setState(() {
-          searchValue = newValue;
-        });
-      },
-      items: search.map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value,
-              style: TextStyle(
-                  color: Colors.black87,
-                  fontFamily: "ProximaNova",
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600)),
-        );
-      }).toList(),
     );
   }
 
@@ -130,54 +144,60 @@ class AttendencePageState extends State<AttendencePage> {
                 shape: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16.0)),
                 title: Text('Add New Attendence'),
-                content: SizedBox(
-                    height: 150,
-                    child: Form(
-                      key: formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Text("Course Name",
-                              style: TextStyle(
-                                fontFamily: "ProximaNova",
-                                fontSize: 20,
-                                //fontWeight: FontWeight.w600
-                              )),
-                          dropdown(),
-                          Text("Select Date",
-                              style: TextStyle(
-                                fontFamily: "ProximaNova",
-                                fontSize: 20,
-                                //fontWeight: FontWeight.w600
-                              )),
-                          DateTimeField(
-                            format: format,
-                            initialValue: DateTime.now(),
-                            onSaved: (value) {
-                              time = value;
-                            },
-                            onShowPicker: (context, currentValue) async {
-                              final date = await showDatePicker(
-                                  context: context,
-                                  firstDate: DateTime(1900),
-                                  initialDate: currentValue ?? DateTime.now(),
-                                  lastDate: DateTime(2100));
-                              if (date != null) {
-                                final time = await showTimePicker(
-                                  context: context,
-                                  initialTime: TimeOfDay.fromDateTime(
-                                      currentValue ?? DateTime.now()),
-                                );
-                                return DateTimeField.combine(date, time);
-                              } else {
-                                return currentValue;
-                              }
-                            },
-                          ),
-                        ],
+                content: Form(
+                  key: formKey,
+                  child: Wrap(
+                    direction: Axis.horizontal,
+                    spacing: 5,
+                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(top: 10),
+                        child: Text("Course Name",
+                            style: TextStyle(
+                              fontFamily: "ProximaNova",
+                              fontSize: 20,
+                              //fontWeight: FontWeight.w600
+                            )),
                       ),
-                    )),
+                      dropdown(),
+                      Text("Select Date",
+                          style: TextStyle(
+                            fontFamily: "ProximaNova",
+                            fontSize: 20,
+                            //fontWeight: FontWeight.w600
+                          )),
+                      DateTimeField(
+                        format: format,
+                        initialValue: DateTime.now(),
+                        onSaved: (value) {
+                          if (value == null) {
+                            time = DateTime.now();
+                          } else {
+                            time = value;
+                          }
+                        },
+                        onShowPicker: (context, currentValue) async {
+                          final date = await showDatePicker(
+                              context: context,
+                              firstDate: DateTime(1900),
+                              initialDate: currentValue ?? DateTime.now(),
+                              lastDate: DateTime(2100));
+                          if (date != null) {
+                            final time = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.fromDateTime(
+                                  currentValue ?? DateTime.now()),
+                            );
+                            return DateTimeField.combine(date, time);
+                          } else {
+                            return currentValue;
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
                 actions: <Widget>[
                   // usually buttons at the bottom of the dialog
                   new FlatButton(
@@ -186,8 +206,10 @@ class AttendencePageState extends State<AttendencePage> {
                       formKey.currentState.save();
                       Attendence attendence = new Attendence(
                           courseName, time.millisecondsSinceEpoch);
-                      dc.saveAttendence(attendence);
+                      await dc.saveAttendence(attendence);
+
                       Navigator.of(context).pop();
+
                       var router = new MaterialPageRoute(
                           builder: (BuildContext context) =>
                               new AttendencePage(courses));
@@ -235,23 +257,12 @@ class AttendencePageState extends State<AttendencePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.lightGreen,
-        title: Row(
-          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Text("Course Name : ",
-                style: TextStyle(
-                    color: Colors.black87,
-                    fontFamily: "ProximaNova",
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600)),
-            //SizedBox(),
-            searchdropdown()
-          ],
-        ),
+        title: searchdropdown(),
       ),
       //backgroundColor: Colors.transparent,
       body: Container(
@@ -286,6 +297,6 @@ class AttendencePageState extends State<AttendencePage> {
         icon: Icon(Icons.add),
         backgroundColor: Color.fromRGBO(80, 200, 10, 0.7),
       ),
-    );
+    ));
   }
 }

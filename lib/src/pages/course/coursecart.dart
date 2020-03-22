@@ -11,6 +11,7 @@ class CourseCart extends StatelessWidget {
   DatabaseClass dc = new DatabaseClass();
   TextEditingController controller = new TextEditingController();
   void _showDialog(context, index) {
+    final _formKey = GlobalKey<FormState>();
     showGeneralDialog(
         barrierColor: Colors.black.withOpacity(0.5),
         transitionBuilder: (context, a1, a2, widget) {
@@ -23,30 +24,43 @@ class CourseCart extends StatelessWidget {
                 shape: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16.0)),
                 title: Text('Edit Course'),
-                content: TextField(controller: controller),
+                content: Form(
+                    key: _formKey,
+                    child: TextFormField(
+                      controller: controller,
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter a course name';
+                        }
+                        return null;
+                      },
+                    )),
                 actions: <Widget>[
                   // usually buttons at the bottom of the dialog
                   new FlatButton(
                     child: new Text("Submit"),
                     onPressed: () async {
-                      DatabaseClass dc = new DatabaseClass();
-                      final attns = await dc.getattendencesbyCourseName(
-                          courses[index].courseName);
-                      List<Attendence> attendences = attns;
+                      if (_formKey.currentState.validate()) {
+                        DatabaseClass dc = new DatabaseClass();
+                        final attns = await dc.getattendencesbyCourseName(
+                            courses[index].courseName);
+                        List<Attendence> attendences = attns;
+                        String cname =
+                            '${controller.text[0].toUpperCase()}${controller.text.substring(1)}';
+                        courses[index].editCourseName(cname);
+                        await dc.updateCourse(courses[index]);
 
-                      courses[index].editCourseName(controller.text);
-                      await dc.updateCourse(courses[index]);
-
-                      for (int i = 0; i < attendences.length; i++) {
-                        attendences[i].courseName = controller.text;
-                        await dc.updateAttendence(attendences[i]);
+                        for (int i = 0; i < attendences.length; i++) {
+                          attendences[i].courseName = controller.text;
+                          await dc.updateAttendence(attendences[i]);
+                        }
+                        controller.clear();
+                        Navigator.of(context).pop();
+                        var router = new MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                new CoursePage(""));
+                        Navigator.of(context).pushReplacement(router);
                       }
-                      controller.clear();
-                      Navigator.of(context).pop();
-                      var router = new MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              new CoursePage(""));
-                      Navigator.of(context).pushReplacement(router);
                     },
                   ),
                 ],
@@ -99,57 +113,130 @@ class CourseCart extends StatelessWidget {
   }
 
   Widget buildProductItem(BuildContext context, int index) {
-    return InkWell(
-      onTap: () {
-        var router = new MaterialPageRoute(
-            builder: (BuildContext context) =>
-                new StudentPage.course(courses[index], courses[index].id));
-        Navigator.of(context).push(router);
-      },
-      child: Card(
+    String st = " student";
+    if (courses[index].studentId.length > 1) {
+      st = " students";
+    }
+    return Card(
         shape: RoundedRectangleBorder(
-          //side: BorderSide(width: 1),
+          //side: BorderSide(color: Colors.white70, width: 1),
           borderRadius: BorderRadius.circular(15),
         ),
         color: Colors.grey,
         elevation: 5,
         margin: EdgeInsets.all(10),
-        child: Padding(
-          padding: EdgeInsets.all(7),
-          child: Stack(children: <Widget>[
-            Align(
-              alignment: Alignment.centerRight,
-              child: Stack(
-                children: <Widget>[
-                  Padding(
-                      padding: const EdgeInsets.only(left: 10, top: 5),
-                      child: Column(
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              courseIcon(index),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              courseDetails(index),
-                              Spacer(),
-                              editIcon(context, index),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              deleteIcon(index, context),
-                            ],
-                          ),
-                        ],
-                      ))
-                ],
+        child: ListTile(
+          leading: Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Text(courses[index].courseName.substring(0, 1).toUpperCase(),
+                style: TextStyle(fontSize: 24, fontFamily: "ProximaNova")),
+          ),
+          title: Text(
+              '${courses[index].courseName[0].toUpperCase()}${courses[index].courseName.substring(1)}',
+              style: TextStyle(
+                fontFamily: "ProximaNova",
+                fontSize: 20,
+                //fontWeight: FontWeight.w600
+              )),
+          subtitle: Text(courses[index].studentId.length.toString() + st,
+              style: TextStyle(
+                  fontFamily: "ProximaNova",
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600)),
+          trailing: Wrap(
+            spacing: 10, // space between two icons
+            children: <Widget>[
+              CircleAvatar(
+                backgroundColor: Colors.white,
+                child: IconButton(
+                    color: Colors.green,
+                    icon: Icon(Icons.edit),
+                    onPressed: () {
+                      controller = new TextEditingController(
+                          text: courses[index].courseName);
+                      _showDialog(context, index);
+                    }),
               ),
-            )
-          ]),
-        ),
-      ),
-    );
+              // SizedBox(
+              //   width: 5,
+              // ),
+              CircleAvatar(
+                backgroundColor: Colors.white,
+                child: IconButton(
+                    color: Colors.red,
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      _showAlert(index, context);
+                    }),
+              ),
+              // icon-2
+            ],
+          ),
+          onTap: () async {
+            var router = new MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    new StudentPage.course(courses[index], courses[index].id));
+            Navigator.of(context).push(router);
+          },
+        ));
   }
+
+  // Widget buildProductItem(BuildContext context, int index) {
+  //   return InkWell(
+  //     onTap: () {
+  //       var router = new MaterialPageRoute(
+  //           builder: (BuildContext context) =>
+  //               new StudentPage.course(courses[index], courses[index].id));
+  //       Navigator.of(context).push(router);
+  //     },
+  //     child: Card(
+  //       shape: RoundedRectangleBorder(
+  //         //side: BorderSide(width: 1),
+  //         borderRadius: BorderRadius.circular(15),
+  //       ),
+  //       color: Colors.grey,
+  //       elevation: 5,
+  //       margin: EdgeInsets.all(10),
+  //       child: Padding(
+  //         padding: EdgeInsets.all(7),
+  //         child: Stack(children: <Widget>[
+  //           Align(
+  //             alignment: Alignment.centerRight,
+  //             child: Stack(
+  //               children: <Widget>[
+  //                 Padding(
+  //                     padding: const EdgeInsets.only(left: 10, top: 5),
+  //                     child: Column(
+  //                       children: <Widget>[
+  //                         Row(
+  //                           children: <Widget>[
+  //                             courseIcon(index),
+  //                             SizedBox(
+  //                               width: 10,
+  //                             ),
+  //                             courseDetails(index),
+  //                             Spacer(),
+  //                             editIcon(context, index),
+  //                             SizedBox(
+  //                               width: 10,
+  //                             ),
+  //                             deleteIcon(index, context),
+  //                           ],
+  //                         ),
+  //                       ],
+  //                     ))
+  //               ],
+  //             ),
+  //           )
+  //         ]),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget courseIcon(index) {
     return Container(

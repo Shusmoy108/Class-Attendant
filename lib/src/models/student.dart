@@ -3,7 +3,7 @@ import 'package:built_collection/built_collection.dart';
 class Student {
   String name;
   int id;
-  String studentId;
+  int studentId;
   double totalattendence = 0;
   List<double> attendences = new List();
   BuiltList<int> courses = new BuiltList();
@@ -16,7 +16,7 @@ class Student {
     this.courses = (this.courses.toBuilder()..remove(course)).build();
   }
 
-  editStudentId(String studentId) {
+  editStudentId(int studentId) {
     this.studentId = studentId;
   }
 

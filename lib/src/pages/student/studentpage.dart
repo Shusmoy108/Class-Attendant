@@ -4,6 +4,7 @@ import 'package:attendencemeter/src/models/student.dart';
 import 'package:attendencemeter/src/pages/student/studentaddbutton.dart';
 import 'package:attendencemeter/src/pages/student/studentcart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class StudentPage extends StatefulWidget {
   int courseId;
@@ -45,6 +46,7 @@ class StudentPageState extends State<StudentPage> {
   TextEditingController namecontroller = new TextEditingController();
   TextEditingController idcontroller = new TextEditingController();
   void _showDialog(context) {
+    final _formKey = GlobalKey<FormState>();
     showGeneralDialog(
         barrierColor: Colors.black.withOpacity(0.5),
         transitionBuilder: (context, a1, a2, widget) {
@@ -57,22 +59,38 @@ class StudentPageState extends State<StudentPage> {
                 shape: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16.0)),
                 title: Text('Add Student'),
-                content: SizedBox(
-                  height: 150,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                content: Form(
+                  key: _formKey,
+                  child: Wrap(
+                    direction: Axis.horizontal,
+                    spacing: 5,
                     children: <Widget>[
-                      TextField(
+                      TextFormField(
                         controller: idcontroller,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter.digitsOnly
+                        ],
                         decoration:
                             new InputDecoration(labelText: 'Student ID'),
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter a student id';
+                          }
+                          return null;
+                        },
                       ),
-                      TextField(
+                      TextFormField(
                         controller: namecontroller,
                         decoration: new InputDecoration(
                             labelText: 'Student Name',
                             hintText: 'eg. John Smith'),
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter a student name';
+                          }
+                          return null;
+                        },
                       ),
                     ],
                   ),
@@ -82,27 +100,29 @@ class StudentPageState extends State<StudentPage> {
                   new FlatButton(
                     child: new Text("Submit"),
                     onPressed: () async {
-                      DatabaseClass dc = new DatabaseClass();
-                      Student student =
-                          new Student(idcontroller.text, namecontroller.text);
-                      if (courseId != -1) {
-                        await dc.saveStudent(student);
-                        await dc.updateCourseafterStudentAdd(c, student);
-                        namecontroller.clear();
-                        idcontroller.clear();
-                        var router = new MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                new StudentPage.course(c, courseId));
-                        Navigator.of(context).pushReplacement(router);
-                      } else {
-                        await dc.saveStudent(student);
-                        namecontroller.clear();
-                        idcontroller.clear();
-                        Navigator.of(context).pop();
-                        var router = new MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                new StudentPage(courseId));
-                        Navigator.of(context).pushReplacement(router);
+                      if (_formKey.currentState.validate()) {
+                        DatabaseClass dc = new DatabaseClass();
+                        Student student = new Student(
+                            int.parse(idcontroller.text), namecontroller.text);
+                        if (courseId != -1) {
+                          await dc.saveStudent(student);
+                          await dc.updateCourseafterStudentAdd(c, student);
+                          namecontroller.clear();
+                          idcontroller.clear();
+                          var router = new MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  new StudentPage.course(c, courseId));
+                          Navigator.of(context).pushReplacement(router);
+                        } else {
+                          await dc.saveStudent(student);
+                          namecontroller.clear();
+                          idcontroller.clear();
+                          Navigator.of(context).pop();
+                          var router = new MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  new StudentPage(courseId));
+                          Navigator.of(context).pushReplacement(router);
+                        }
                       }
                     },
                   ),
@@ -137,38 +157,39 @@ class StudentPageState extends State<StudentPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          backgroundColor: Colors.lightGreen,
-          title: Text(
-            'Students',
-            style: TextStyle(
-                fontFamily: "ProximaNova",
-                fontSize: 24,
-                fontWeight: FontWeight.w600),
-          ),
-        ),
-        //backgroundColor: Colors.transparent,
-        body: Container(
-            //color: Color.fromRGBO(66, 58, 18, 1),
-            //color: Colors.black54,
-            //color: Color.fromRGBO(234, 239, 241, 1.0),
-            //margin: EdgeInsets.all(10.0),
-            child: FutureBuilder(
-          future: getstudents(),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.data == null) {
-              return Container(
-                child: Center(
-                  child: Text("You have not added any students"),
-                ),
-              );
-            } else {
-              return StudentCart(snapshot.data, c, courseId);
-            }
-          },
-        )),
-        floatingActionButton: floating());
+    return SafeArea(
+        child: Scaffold(
+            appBar: AppBar(
+              centerTitle: true,
+              backgroundColor: Colors.lightGreen,
+              title: Text(
+                'Students',
+                style: TextStyle(
+                    fontFamily: "ProximaNova",
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600),
+              ),
+            ),
+            //backgroundColor: Colors.transparent,
+            body: Container(
+                //color: Color.fromRGBO(66, 58, 18, 1),
+                //color: Colors.black54,
+                //color: Color.fromRGBO(234, 239, 241, 1.0),
+                //margin: EdgeInsets.all(10.0),
+                child: FutureBuilder(
+              future: getstudents(),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.data == null) {
+                  return Container(
+                    child: Center(
+                      child: Text("You have not added any students"),
+                    ),
+                  );
+                } else {
+                  return StudentCart(snapshot.data, c, courseId);
+                }
+              },
+            )),
+            floatingActionButton: floating()));
   }
 }

@@ -1,11 +1,11 @@
 import 'package:attendencemeter/src/database/database.dart';
 import 'package:attendencemeter/src/models/course.dart';
-import 'package:attendencemeter/src/pages/course/coursecart.dart';
+import 'package:attendencemeter/src/models/profile.dart';
 import 'package:attendencemeter/src/pages/statistics/statisticcart.dart';
 import 'package:flutter/material.dart';
 
 class StatisticPage extends StatefulWidget {
-  String m;
+  Profile m;
   StatisticPage(this.m);
   @override
   State<StatefulWidget> createState() {
@@ -14,7 +14,7 @@ class StatisticPage extends StatefulWidget {
 }
 
 class StatisticPageState extends State<StatisticPage> {
-  String m;
+  Profile m;
   StatisticPageState(this.m);
   Future<List<Course>> courses;
   DatabaseClass dc = new DatabaseClass();
@@ -31,7 +31,8 @@ class StatisticPageState extends State<StatisticPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.lightGreen,
@@ -57,10 +58,10 @@ class StatisticPageState extends State<StatisticPage> {
               ),
             );
           } else {
-            return StatisticCart(snapshot.data);
+            return StatisticCart(snapshot.data, m);
           }
         },
       )),
-    );
+    ));
   }
 }

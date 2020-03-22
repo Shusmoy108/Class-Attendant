@@ -102,8 +102,13 @@ class AttendenceCart extends StatelessWidget {
                             initialValue: DateTime.fromMillisecondsSinceEpoch(
                                 attendences[index].time),
                             onSaved: (value) {
-                              attendences[index]
-                                  .editTime(value.millisecondsSinceEpoch);
+                              if (value == null) {
+                                attendences[index].editTime(
+                                    DateTime.now().millisecondsSinceEpoch);
+                              } else {
+                                attendences[index]
+                                    .editTime(value.millisecondsSinceEpoch);
+                              }
                             },
                             onShowPicker: (context, currentValue) async {
                               final date = await showDatePicker(
@@ -181,7 +186,8 @@ class AttendenceCart extends StatelessWidget {
                 fontSize: 20,
                 //fontWeight: FontWeight.w600
               )),
-          subtitle: Text(attendences[index].courseName,
+          subtitle: Text(
+              '${attendences[index].courseName[0].toUpperCase()}${attendences[index].courseName.substring(1)}',
               style: TextStyle(
                   fontFamily: "ProximaNova",
                   fontSize: 20,
